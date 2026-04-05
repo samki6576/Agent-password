@@ -39,13 +39,48 @@ export default function DashboardPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  const MOCK_EVENTS: CalendarEvent[] = [
+    {
+      id: 'mock-1',
+      summary: 'Hackathon Final Pitch',
+      description: 'The final presentation of AgentPassport Lite. Show off the secure gateway!',
+      start: { dateTime: new Date(Date.now() + 3600000).toISOString() },
+      end: { dateTime: new Date(Date.now() + 7200000).toISOString() },
+      organizer: { email: 'hackathon@example.com', displayName: 'Hackathon Team' }
+    },
+    {
+      id: 'mock-2',
+      summary: 'Sync with AI Agent',
+      description: 'Automated sync session between the Google Calendar and the AI Agent.',
+      start: { dateTime: new Date(Date.now() + 86400000).toISOString() },
+      end: { dateTime: new Date(Date.now() + 90000000).toISOString() },
+      organizer: { email: 'agent@agentpassport.io', displayName: 'Agent Butler' }
+    },
+    {
+      id: 'mock-3',
+      summary: 'Security Audit Review',
+      description: 'Reviewing the Auth0 Token Vault integration and gateway security logs.',
+      start: { dateTime: new Date(Date.now() + 172800000).toISOString() },
+      end: { dateTime: new Date(Date.now() + 176400000).toISOString() },
+      organizer: { email: 'security@agentpassport.io', displayName: 'Security Bot' }
+    }
+  ];
+
   // Check if user is authenticated on mount
   useEffect(() => {
     checkAuthStatus();
   }, []);
 
   const checkAuthStatus = () => {
-    // Check if access_token cookie exists by trying to fetch events
+    // Check if fake_auth exists first (hackathon mode)
+    const isFakeAuth = localStorage.getItem('fake_auth') === 'true';
+    if (isFakeAuth) {
+      setAuthenticated(true);
+      setEvents(MOCK_EVENTS);
+      return;
+    }
+
+    // Otherwise check if access_token cookie exists by trying to fetch events
     fetchEvents(true);
   };
 
@@ -123,6 +158,9 @@ export default function DashboardPage() {
   };
 
   const handleLogout = () => {
+    // Clear fake auth
+    localStorage.removeItem('fake_auth');
+
     // Clear cookies by calling a logout endpoint
     fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
       .catch(() => {
@@ -207,7 +245,7 @@ export default function DashboardPage() {
                   </ul>
                 </div>
                 <Button
-                  onClick={handleConnect}
+                  onClick={() => window.location.href = '/login'}
                   size="lg"
                   className="w-full bg-blue-600 hover:bg-blue-700"
                 >
