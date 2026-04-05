@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exchangeCodeForToken } from '../../../../lib/auth0';
+import { exchangeCodeForToken, getBaseUrl } from '../../../../lib/auth0';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +18,14 @@ export async function GET(request: NextRequest) {
       } catch (e) {}
     }
     
-    const tokenResponse = await exchangeCodeForToken(code, `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/callback`);
+    // Use the dynamic base URL from headers (handles Vercel and local dev correctly)
+    const baseUrl = getBaseUrl(request);
+    const redirectUri = `${baseUrl}/api/auth/callback`;
+    
+    const tokenResponse = await exchangeCodeForToken(code, redirectUri);
+
+
+
     
     const response = NextResponse.redirect(new URL(callbackUrl, request.url));
     response.cookies.set({

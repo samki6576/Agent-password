@@ -1,3 +1,4 @@
+import { NextRequest } from 'next/server';
 import {jwtDecode} from 'jwt-decode';
 
 export interface Auth0Config {
@@ -10,22 +11,38 @@ export interface Auth0Config {
 }
 
 export function getAuth0Config(): Auth0Config {
-  // Prefer values from environment variables (set in .env.local).
-  // Fallback to hard-coded development values only if env vars are missing.
+  // Prefer values from environment variables.
   const domain = process.env.AUTH0_DOMAIN || 'dev-p5rzimkpdjozgn20.us.auth0.com';
   const clientId = process.env.AUTH0_CLIENT_ID || 'UKqA81XdXJNQDqulOeWj7bxC0ev5qDiv';
   const clientSecret = process.env.AUTH0_CLIENT_SECRET || 'Z8sxPMUzX-X7AtGe6tYsfCHKFw6Pd4_xE0LqfrLjEYFshblApihxIy5eDtnxX58p';
+  
+  // Use NEXT_PUBLIC_APP_URL if available, otherwise fallback to localhost for development.
+  // In production (Vercel), we'll try to get the origin from the request headers in the API routes.
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  
   const m2mClientId = process.env.AUTH0_M2M_CLIENT_ID || clientId;
   const m2mClientSecret = process.env.AUTH0_M2M_CLIENT_SECRET || clientSecret;
 
-  if (!domain || !clientId || !clientSecret || !appUrl) {
+  if (!domain || !clientId || !clientSecret) {
     throw new Error(
-      'Missing Auth0 environment variables. Please set AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, and NEXT_PUBLIC_APP_URL'
+      'Missing Auth0 environment variables. Please set AUTH0_DOMAIN, AUTH0_CLIENT_ID, and AUTH0_CLIENT_SECRET'
     );
   }
 
   return { domain, clientId, clientSecret, appUrl, m2mClientId, m2mClientSecret };
+}
+
+export function getBaseUrl(request: NextRequest): string {
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const protocol = request.headers.get('x-forwarded-proto') || 'http';
+  
+  if (host) {
+    return `${protocol}://${host}`;
+  }
+  
+  // Fallback to config
+  const config = getAuth0Config();
+  return config.appUrl;
 }
 
 export function getAuth0Url(): string {
@@ -102,13 +119,16 @@ export function isTokenExpired(token: string): boolean {
   }
 }
 
-export function getLoginUrl(callbackUrl: string): string {
+export function getLoginUrl(callbackUrl: string, baseUrl?: string): string {
   const config = getAuth0Config();
+  // Prioritize passed baseUrl (from request origin), then env var, then fallback.
+  const appUrl = baseUrl || config.appUrl;
+  
   const params = new URLSearchParams({
     client_id: config.clientId,
     response_type: 'code',
     scope: 'openid profile email offline_access',
-    redirect_uri: `${config.appUrl}/api/auth/callback`,
+    redirect_uri: `${appUrl}/api/auth/callback`,
     state: Buffer.from(JSON.stringify({ callbackUrl })).toString('base64'),
     prompt: 'consent',
     // Force Google Connection
@@ -118,6 +138,7 @@ export function getLoginUrl(callbackUrl: string): string {
   });
   return `https://${config.domain}/authorize?${params.toString()}`;
 }
+
 
 export async function getGoogleAccessToken(auth0AccessToken: string): Promise<string> {
   const config = getAuth0Config();
