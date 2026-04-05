@@ -7,8 +7,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'AgentPassport Lite | Secure AI Agent API Gateway',
-  description: 'Auth0 Token Vault-powered secure API gateway for AI agents. Agents call endpoints without handling credentials.',
+  title: 'AgentPassport: Auth0 Token Vault for AI Agents',
+  description: 'Securely delegate data access to AI agents via Auth0 Identity Tokens. Protect your credentials with a scoped, audited gateway.',
   generator: 'v0.app',
   icons: {
     icon: [

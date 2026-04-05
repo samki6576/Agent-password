@@ -66,6 +66,19 @@ export default function DashboardPage() {
     }
   ];
 
+  const MOCK_AGENTS = [
+    { name: 'Agent Butler', status: 'Active', scope: 'Calendar.Read', lastAccess: '2 mins ago' },
+    { name: 'Security Bot', status: 'Idle', scope: 'Logs.Read', lastAccess: '1 hour ago' },
+    { name: 'Meeting Scheduler', status: 'Active', scope: 'Calendar.Write', lastAccess: 'Just now' }
+  ];
+
+  const MOCK_LOGS = [
+    { id: 1, agent: 'Meeting Scheduler', action: 'Requested availability', status: 'Success', time: 'Just now' },
+    { id: 2, agent: 'Agent Butler', action: 'Fetched daily agenda', status: 'Success', time: '5 mins ago' },
+    { id: 3, agent: 'Security Bot', action: 'Audit log rotation', status: 'Success', time: '1 hour ago' },
+    { id: 4, agent: 'System', action: 'Token refreshed via Auth0', status: 'Success', time: '4 hours ago' }
+  ];
+
   // Check if user is authenticated on mount
   useEffect(() => {
     checkAuthStatus();
@@ -195,10 +208,10 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-4xl font-bold text-slate-900 mb-2">
-                AgentPassport Lite
+                AgentPassport: Token Vault
               </h1>
               <p className="text-slate-600">
-                Secure AI agent access to Google Calendar via Auth0 Token Vault
+                Securely delegate data access to AI agents via Auth0 Identity Tokens
               </p>
             </div>
           </div>
@@ -295,57 +308,123 @@ export default function DashboardPage() {
               </Button>
             </div>
 
-            {/* Events Section */}
-            <Card className="bg-white border-slate-200">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Your Calendar Events</CardTitle>
-                    <CardDescription>
-                      Retrieved securely via the AgentPassport gateway
-                    </CardDescription>
+            {/* Token Vault Status Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <Card className="bg-white border-slate-200">
+                <CardContent className="pt-6">
+                  <div className="text-sm font-medium text-slate-500 mb-1">Vault Status</div>
+                  <div className="text-2xl font-bold text-green-600 flex items-center">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                    Encrypted
                   </div>
-                  <div className="text-sm font-semibold text-slate-600 bg-slate-100 px-3 py-1 rounded">
-                    {events.length} event{events.length !== 1 ? 's' : ''}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {events.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500">
-                    <p>No upcoming events found in your calendar</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {events.map((event) => (
-                      <div
-                        key={event.id}
-                        className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-semibold text-slate-900 text-lg">
-                            {event.summary}
-                          </h3>
-                          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded">
-                            {formatEventTime(event)}
-                          </span>
+                </CardContent>
+              </Card>
+              <Card className="bg-white border-slate-200">
+                <CardContent className="pt-6">
+                  <div className="text-sm font-medium text-slate-500 mb-1">Primary Provider</div>
+                  <div className="text-2xl font-bold text-slate-900">Google OAuth2</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white border-slate-200">
+                <CardContent className="pt-6">
+                  <div className="text-sm font-medium text-slate-500 mb-1">Active Scopes</div>
+                  <div className="text-2xl font-bold text-slate-900">Calendar.Read</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+              {/* Main Content: Events */}
+              <div className="lg:col-span-2">
+                <Card className="bg-white border-slate-200 h-full">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle>Vaulted Data Preview</CardTitle>
+                        <CardDescription>
+                          Data available to authorized agents
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {events.length === 0 ? (
+                      <div className="text-center py-8 text-slate-500">
+                        <p>No vaulted data found</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {events.map((event) => (
+                          <div
+                            key={event.id}
+                            className="border border-slate-200 rounded-lg p-4 hover:shadow-sm transition-shadow bg-slate-50/50"
+                          >
+                            <div className="flex items-start justify-between mb-1">
+                              <h3 className="font-semibold text-slate-900">
+                                {event.summary}
+                              </h3>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                {formatEventTime(event)}
+                              </span>
+                            </div>
+                            {event.description && (
+                              <p className="text-xs text-slate-600">
+                                {event.description}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Sidebar: Agents & Logs */}
+              <div className="space-y-8">
+                {/* Authorized Agents */}
+                <Card className="bg-white border-slate-200">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Authorized Agents</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {MOCK_AGENTS.map((agent) => (
+                      <div key={agent.name} className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-semibold text-slate-900">{agent.name}</div>
+                          <div className="text-[10px] text-slate-500">{agent.scope}</div>
                         </div>
-                        {event.description && (
-                          <p className="text-sm text-slate-600 mb-2">
-                            {event.description}
-                          </p>
-                        )}
-                        {event.organizer && (
-                          <p className="text-xs text-slate-500">
-                            Organizer: {event.organizer.displayName || event.organizer.email}
-                          </p>
-                        )}
+                        <div className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                          agent.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {agent.status}
+                        </div>
                       </div>
                     ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+
+                {/* Audit Logs */}
+                <Card className="bg-slate-900 border-slate-800 text-slate-100">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-white">Security Audit Log</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 font-mono text-[10px]">
+                    {MOCK_LOGS.map((log) => (
+                      <div key={log.id} className="border-l-2 border-blue-500 pl-2 py-1">
+                        <div className="flex justify-between text-blue-400 mb-0.5">
+                          <span>[{log.time}]</span>
+                          <span>{log.status}</span>
+                        </div>
+                        <div className="text-slate-300">
+                          <span className="text-white">{log.agent}</span>: {log.action}
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
 
             {/* Security Info */}
             <Card className="mt-8 bg-green-50 border-green-200">

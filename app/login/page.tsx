@@ -28,12 +28,16 @@ export default function LoginPage() {
               A
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-slate-900">Welcome Back</CardTitle>
+          <CardTitle className="text-2xl font-bold text-slate-900">AgentPassport: Token Vault</CardTitle>
           <CardDescription>
-            Securely access your AgentPassport dashboard
+            Securely delegate data access to your AI agents via Auth0
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
+          <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-blue-800 text-left">
+            <p className="font-semibold mb-1">🛡️ Why Auth0 Token Vault?</p>
+            <p>Instead of exposing sensitive OAuth keys to AI agents, we use Auth0 to securely manage high-privilege tokens and provide a controlled, scoped gateway.</p>
+          </div>
           <Button
             onClick={handleFakeLogin}
             disabled={loading}
