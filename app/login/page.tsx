@@ -1,7 +1,8 @@
-F'use client';
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
@@ -23,11 +24,27 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <Card className="w-full max-w-md shadow-lg border-slate-200">
         <CardHeader className="text-center space-y-2">
-    <div className="flex justify-center mb-2">
-  <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center overflow-hidden">
-    <img src="./logo.png" alt="Logo" className="w-full h-full object-cover" />
-  </div>
-</div>
+          <div className="flex justify-center mb-2">
+            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center overflow-hidden relative">
+              <Image 
+                src="/logo.png" 
+                alt="Logo" 
+                fill
+                className="object-cover"
+                sizes="48px"
+                onError={(e) => {
+                  // Fallback if image doesn't exist
+                  const target = e.currentTarget;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = '🪪';
+                    parent.className = "w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white text-2xl";
+                  }
+                }}
+              />
+            </div>
+          </div>
           <CardTitle className="text-2xl font-bold text-slate-900">AgentPassport: Token Vault</CardTitle>
           <CardDescription>
             Securely delegate data access to your AI agents via Auth0
