@@ -27,7 +27,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-2">
             <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center overflow-hidden relative">
               <Image 
-                src="/logo.png" 
+                src="/logo.svg" 
                 alt="Logo" 
                 fill
                 className="object-cover"
