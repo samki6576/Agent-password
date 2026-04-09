@@ -1,4 +1,4 @@
-'use client';
+F'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -23,11 +23,11 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <Card className="w-full max-w-md shadow-lg border-slate-200">
         <CardHeader className="text-center space-y-2">
-          <div className="flex justify-center mb-2">
-            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl">
-              A
-            </div>
-          </div>
+    <div className="flex justify-center mb-2">
+  <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center overflow-hidden">
+    <img src="./logo.png" alt="Logo" className="w-full h-full object-cover" />
+  </div>
+</div>
           <CardTitle className="text-2xl font-bold text-slate-900">AgentPassport: Token Vault</CardTitle>
           <CardDescription>
             Securely delegate data access to your AI agents via Auth0
